@@ -23,7 +23,6 @@
     <array name="shutdown_reboot_options">
         <item>Omstart</item>
         <item>Recovery</item>
-        <item>Bootloader</item>
     </array>
 
 </resources>
