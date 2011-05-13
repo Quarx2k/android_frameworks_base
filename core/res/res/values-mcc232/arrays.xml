@@ -28,5 +28,4 @@
     <integer-array name="maps_starting_zoom">
         <item>6</item>
     </integer-array>
-
 </resources>
