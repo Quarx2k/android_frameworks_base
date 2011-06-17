@@ -157,21 +157,14 @@ ifeq ($(BOARD_HAVE_FM_RADIO),true)
 	ifeq ($(BOARD_WLAN_DEVICE),wl1271)
 		LOCAL_SRC_FILES += android_hardware_fm_wl1271.cpp
 	else
-<<<<<<< HEAD
-	  //could be tiwlan0 for Moto TI SDK
-          ifeq ($(BOARD_FM_DEVICE),wl1271)
-                LOCAL_SRC_FILES += android_hardware_fm_wl1271.cpp
-          endif
-	endif
-endif
-=======
+
 	  # could be tiwlan0 for Moto TI SDK
 	  ifeq ($(BOARD_FM_DEVICE),wl1271)
 		LOCAL_SRC_FILES += android_hardware_fm_wl1271.cpp
 	  endif
 	endif
   endif
->>>>>>> 0744b0ad324ef39f29f2163cdc25931da0575cd8
+
 endif
 
 LOCAL_C_INCLUDES += \
