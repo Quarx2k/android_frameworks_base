@@ -145,6 +145,7 @@ LOCAL_SRC_FILES:= \
 	android_content_res_Configuration.cpp
 
 ifeq ($(BOARD_HAVE_FM_RADIO),true)
+<<<<<<< HEAD
   ifeq ($(BOARD_FM_DEVICE),si4709)
 		LOCAL_SRC_FILES += android_hardware_fm_si4709.cpp
   else
@@ -165,6 +166,28 @@ ifeq ($(BOARD_HAVE_FM_RADIO),true)
 	endif
   endif
 
+=======
+ifeq ($(BOARD_FM_DEVICE),si4709)
+    LOCAL_SRC_FILES += android_hardware_fm_si4709.cpp
+else
+    ifeq ($(BOARD_FM_DEVICE),si4708)
+        LOCAL_SRC_FILES += android_hardware_fm_si4708.cpp
+    else
+        ifeq ($(BOARD_WLAN_DEVICE),bcm4329)
+            LOCAL_SRC_FILES += android_hardware_fm_bcm4325.cpp
+        endif
+        ifeq ($(BOARD_WLAN_DEVICE),bcm4325)
+            LOCAL_SRC_FILES += android_hardware_fm_bcm4325.cpp
+        endif
+        ifeq ($(BOARD_WLAN_DEVICE),wl1251)
+            LOCAL_SRC_FILES += android_hardware_fm_wl1271.cpp
+        endif
+        ifeq ($(BOARD_WLAN_DEVICE),wl1271)
+            LOCAL_SRC_FILES += android_hardware_fm_wl1271.cpp
+        endif
+    endif
+endif
+>>>>>>> d818e9bc594ac96b45c234bf121b9b9a7f8ab74d
 endif
 
 LOCAL_C_INCLUDES += \
