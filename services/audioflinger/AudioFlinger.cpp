@@ -698,6 +698,10 @@ String8 newKey = keyValuePairs;
              newKey = "FM_routing=DEVICE_OUT_WIRED_HEADPHONE";
              LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
              mAudioHardware->setParameters(newKey);
+
+             //set AUDIO_ENABLE_ANALOG (may suppres weird noise)
+             system("hcitool cmd 0x3f 0x135 0x1d 0x02 0x00 0x00 0x02");
+
          } else if (device == AudioSystem::DEVICE_OUT_SPEAKER) {
              newKey = "FM_routing=DEVICE_OUT_SPEAKER";
              LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
@@ -718,8 +722,6 @@ String8 newKey = keyValuePairs;
             newKey = "FM_launch=on";
             LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
             mAudioHardware->setParameters(newKey);
-            //set AUDIO_ENABLE_ANALOG (suppres weird noise)
-            system("hcitool cmd 0x3f 0x135 0x1d 0x02 0x00 0x00 0x02");
         } else {
             mFmOn = false;
             // seems not working on fast power off+power on, so we ignore that
