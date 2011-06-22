@@ -172,6 +172,7 @@ public:
 
 #ifdef HAVE_FM_RADIO
     virtual status_t setFmVolume(float volume);
+    virtual status_t setFmRadioVolume(float volume);
 #endif
 
     enum hardware_call_state {
