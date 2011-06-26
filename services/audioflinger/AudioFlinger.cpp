@@ -698,10 +698,6 @@ String8 newKey = keyValuePairs;
              newKey = "FM_routing=DEVICE_OUT_WIRED_HEADPHONE";
              LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
              mAudioHardware->setParameters(newKey);
-
-             //set AUDIO_ENABLE_ANALOG (may suppres weird noise)
-             system("hcitool cmd 0x3f 0x135 0x1d 0x02 0x00 0x00 0x02");
-
          } else if (device == AudioSystem::DEVICE_OUT_SPEAKER) {
              newKey = "FM_routing=DEVICE_OUT_SPEAKER";
              LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
@@ -714,19 +710,15 @@ String8 newKey = keyValuePairs;
 
     String8 fmOnKey = String8(AudioParameter::keyFmOn);
     String8 fmOffKey = String8(AudioParameter::keyFmOff);
-    String8 fmFMKey = String8("FM_launch");
-    if (param.getInt(fmOnKey, device) == NO_ERROR || param.getInt(fmFMKey, device) == NO_ERROR) {
+    if (param.getInt(fmOnKey, device) == NO_ERROR) {
     #ifdef USE_MOTO_FM
         if (device & AudioSystem::DEVICE_OUT_FM_ALL) {
             mFmOn = true;
             newKey = "FM_launch=on";
-            LOGD("MOTO io %d, keys %s, orig key %s", ioHandle, newKey.string(), keyValuePairs.string());
+            LOGD("MOTO io %d, keys %s, orig key %s (%x)", ioHandle, newKey.string(), keyValuePairs.string(), device);
             mAudioHardware->setParameters(newKey);
-        } else {
-            mFmOn = false;
-            // seems not working on fast power off+power on, so we ignore that
-            //newKey = "FM_launch=off";
-            LOGD("MOTO IGNORE : io %d, keys %s device=%d", ioHandle, newKey.string(), device);
+            //set AUDIO_ENABLE_ANALOG (suppres weird noise)
+            //system("hcitool cmd 0x3f 0x135 0x1d 0x02 0x00 0x00 0x02");
         }
     #else
         mFmOn = true;
@@ -735,7 +727,13 @@ String8 newKey = keyValuePairs;
     #endif
     } else if (param.getInt(fmOffKey, device) == NO_ERROR) {
         mFmOn = false;
+    #ifdef USE_MOTO_FM
+            newKey = "FM_launch=off";
+            LOGD("MOTO io %d, keys %s, orig key %s (%x)", ioHandle, newKey.string(), keyValuePairs.string(), device);
+            mAudioHardware->setParameters(newKey);
+    #else
         mAudioHardware->setParameters(keyValuePairs);
+    #endif
     }
 #endif
     // ioHandle == 0 means the parameters are global to the audio hardware interface
