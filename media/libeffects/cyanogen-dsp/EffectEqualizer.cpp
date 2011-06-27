@@ -61,7 +61,7 @@ static int64_t toFixedPoint(float in) {
 }
 
 EffectEqualizer::EffectEqualizer()
-    : mLoudnessAdjustment(10000.f), mLoudness(0.f)
+    : mLoudnessAdjustment(10000.f), mLoudness(50.f), mNextUpdate(0), mNextUpdateInterval(1000), mPowerSquared(0), mFade(0)
 {
     for (int32_t i = 0; i < 5; i ++) {
         mBand[i] = 0;
@@ -79,9 +79,8 @@ int32_t EffectEqualizer::command(uint32_t cmdCode, uint32_t cmdSize, void* pCmdD
 			return 0;
 		}
 
-                /* Weigher for estimating bass compensation. Our adjustments have range from 62.5 to 4000 Hz.
-                 * Most of the adjustment is at the 62.5 Hz band, so we must concentrate on bass region. */
-                mWeigher.setLowPass(1000.0, mSamplingRate, sqrtf(2)/2.);
+                /* 100 updates per second. */
+                mNextUpdateInterval = int32_t(mSamplingRate / 100.);
 
 		int32_t *replyData = (int32_t *) pReplyData;
 		*replyData = 0;
@@ -195,10 +194,12 @@ int32_t EffectEqualizer::command(uint32_t cmdCode, uint32_t cmdSize, void* pCmdD
  * sound pressure level.
  *
  * The boost can be calculated as linear scaling of the following adjustment:
+ *     20 Hz +45 dB (unmodeled)
  *   62.5 Hz +24 dB
  *    250 Hz +10 dB
- *   1000 Hz  0 dB
- *   4000 Hz -6 dB
+ *   1000 Hz   0 dB
+ *   4000 Hz  -3 dB
+ *  16000 Hz  +6 dB
  *
  * The boost will be applied maximally for signals of 20 dB and less,
  * and linearly decreased for signals 20 dB ... 100 dB, and no adjustment is
@@ -206,8 +207,11 @@ int32_t EffectEqualizer::command(uint32_t cmdCode, uint32_t cmdSize, void* pCmdD
  * digital sound level against the audio.
  */
 float EffectEqualizer::getAdjustedBand(int32_t band) {
-    const float adj[5] = { 24.0, 10.0, 0.0, -6.0, 0.0 };
+    const float adj[5] = { 24.0, 10.0, 0.0, -3.0, 6.0 };
 
+    float f = mBand[band];
+
+    /* Add loudness adjustment */
     float loudnessLevel = mLoudness + mLoudnessAdjustment;
     if (loudnessLevel > 100.f) {
         loudnessLevel = 100.f;
@@ -215,11 +219,11 @@ float EffectEqualizer::getAdjustedBand(int32_t band) {
     if (loudnessLevel < 20.f) {
         loudnessLevel = 20.f;
     }
-
-    loudnessLevel = (loudnessLevel - 20) / (100.0 - 20.0);
-
     /* Maximum loudness = no adj (reference behavior at 100 dB) */
-    return mBand[band] + adj[band] * (1. - loudnessLevel);
+    loudnessLevel = (loudnessLevel - 20) / (100.0 - 20.0);
+    f += adj[band] * (1. - loudnessLevel);
+
+    return f * (mFade / 100.f);
 }
 
 void EffectEqualizer::refreshBands()
@@ -234,18 +238,45 @@ void EffectEqualizer::refreshBands()
     }
 }
 
-int32_t EffectEqualizer::process_effect(audio_buffer_t *in, audio_buffer_t *out)
+int32_t EffectEqualizer::process(audio_buffer_t *in, audio_buffer_t *out)
 {
-    refreshBands();
-
-    int64_t maximumPowerSquared = 0;
     for (uint32_t i = 0; i < in->frameCount; i ++) {
+        if (mNextUpdate == 0) {
+            float signalPowerDb = logf(mPowerSquared / mNextUpdateInterval / float(int64_t(1) << 48) + 1e-10f) / logf(10.0f) * 10.0f;
+            signalPowerDb += 96.0f + 10.0f;
+
+            /* Limit automatic EQ to sub-dB adjustments to limit the noise
+             * introduced by updates. */
+            if (mLoudness < signalPowerDb - .5) {
+                mLoudness += .5;
+            } else if (mLoudness > signalPowerDb + .5) {
+                mLoudness -= .5;
+            } else {
+                mLoudness = signalPowerDb;
+            }
+
+            if (mEnable && mFade < 100) {
+                mFade += 1;
+            }
+            if (! mEnable && mFade > 0) {
+                mFade -= 1;
+            }
+
+            /* Update EQ. */
+            refreshBands();
+
+            mNextUpdate = mNextUpdateInterval;
+            mPowerSquared = 0;
+        }
+        mNextUpdate --;
+
         int32_t tmpL = read(in, i * 2);
         int32_t tmpR = read(in, i * 2 + 1);
 
-        /* Calculate signal loudness estimate */
-        int64_t weight = mWeigher.process(tmpL + tmpR);
-        maximumPowerSquared += weight * weight;
+        /* Calculate signal loudness estimate.
+         * XXX: should we be independent per channel? */
+        int64_t weight = tmpL + tmpR;
+        mPowerSquared += weight * weight;
      
         /* first "shelve" is just gain */ 
         tmpL = tmpL * mGain >> 32;
@@ -260,23 +291,6 @@ int32_t EffectEqualizer::process_effect(audio_buffer_t *in, audio_buffer_t *out)
         write(out, i * 2, tmpL);
         write(out, i * 2 + 1, tmpR);
     }
-    maximumPowerSquared /= in->frameCount;
 
-    float signalPowerDb = logf(maximumPowerSquared / float(int64_t(1) << 48) + 1e-10f) / logf(10.0f) * 10.0f;
-    signalPowerDb += 96.0f;
-
-    /* Limit automatic EQ to maximum of 10 dB adjustment rate per second.
-     * a frame-to-frame adjusted should not be very large because adjustments do cause
-     * small glitches at the output. These may be audible if single step is too large. */
-    float maxAdj = in->frameCount / mSamplingRate * 10.f;
-    if (mLoudness < signalPowerDb - maxAdj) {
-        mLoudness += maxAdj;
-    } else if (mLoudness > signalPowerDb + maxAdj) {
-        mLoudness -= maxAdj;
-    } else {
-        mLoudness = signalPowerDb;
-    }
-
-    return 0;
+    return mEnable || mFade != 0 ? 0 : -ENODATA;
 }
-
