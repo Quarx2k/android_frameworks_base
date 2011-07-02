@@ -375,13 +375,13 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Manager", e);
             }
-// Motorola Location Proxy
+/* Motorola Location Proxy
             try {
                 Slog.i(TAG, "Location Proxy Service");
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Proxy Service", e);
             }
-//end
+//end */
             try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
@@ -499,19 +499,23 @@ class ServerThread extends Thread {
             }
         }
 
-		String[] serviceEntries =
-	            context.getResources().getStringArray(com.android.internal.R.array.systemServices);
-	        for (String entry : serviceEntries) {
+	//	String[] serviceEntries =
+	//            context.getResources().getStringArray(com.android.internal.R.array.systemServices);
+		  String entry = "com.motorola.android.location/com.android.server.LocationProxyService";
+	//        for (String entry : serviceEntries) {
 	            try {
 	                ComponentName cn = ComponentName.unflattenFromString(entry);
+			Slog.e(TAG, "Test1:" +  entry );
 	                Intent intent = new Intent();
 	                intent.setComponent(cn);
 	                context.startService(intent);
+			Slog.e(TAG, "Test2:" +  intent );
 	                Slog.i(TAG, "Service started " + cn);
 	            } catch (Throwable e) {
 	                Slog.e(TAG, "Failed to start " + entry, e);
 	            }
-	        }
+	  //      }
+
         // make sure the ADB_ENABLED setting value matches the secure property value
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
                 Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "-1")));
