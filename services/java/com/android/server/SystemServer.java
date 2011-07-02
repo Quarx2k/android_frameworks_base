@@ -375,13 +375,32 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Manager", e);
             }
-/* Motorola Location Proxy
+/*	//	String[] serviceEntries =
+	//            context.getResources().getStringArray(com.android.internal.R.array.systemServices);
+        //        Slog.e(TAG, "Service2222:" +  serviceEntries );
+	//       for (String entry : serviceEntries) {
+	                String entry = "com.motorola.android.location/com.android.server.LocationProxyService";
+	            try {
+	                ComponentName cn = ComponentName.unflattenFromString(entry);
+			Slog.e(TAG, "Service2222:" +  entry );
+	                Intent intent = new Intent();
+	                intent.setComponent(cn);
+	                context.startService(intent);
+			Slog.e(TAG, "Service3333:" +  intent );
+	                Slog.i(TAG, "Service started " + cn);
+	            } catch (Throwable e) {
+	                Slog.e(TAG, "Failed to start " + entry, e);
+	            }
+	  //      }*/
+
+/*Motorola Location Proxy
             try {
                 Slog.i(TAG, "Location Proxy Service");
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Proxy Service", e);
             }
 //end */
+
             try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
@@ -498,23 +517,6 @@ class ServerThread extends Thread {
                 Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
             }
         }
-
-	//	String[] serviceEntries =
-	//            context.getResources().getStringArray(com.android.internal.R.array.systemServices);
-		  String entry = "com.motorola.android.location/com.android.server.LocationProxyService";
-	//        for (String entry : serviceEntries) {
-	            try {
-	                ComponentName cn = ComponentName.unflattenFromString(entry);
-			Slog.e(TAG, "Test1:" +  entry );
-	                Intent intent = new Intent();
-	                intent.setComponent(cn);
-	                context.startService(intent);
-			Slog.e(TAG, "Test2:" +  intent );
-	                Slog.i(TAG, "Service started " + cn);
-	            } catch (Throwable e) {
-	                Slog.e(TAG, "Failed to start " + entry, e);
-	            }
-	  //      }
 
         // make sure the ADB_ENABLED setting value matches the secure property value
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
