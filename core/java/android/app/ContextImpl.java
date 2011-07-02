@@ -81,6 +81,8 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.net.wimax.WimaxHelper;
 import android.net.wimax.WimaxManagerConstants;
+import android.net.locationproxy.LocationProxyHelper;
+import android.net.locationproxy.LocationProxyManagerConstants;
 import android.nfc.NfcManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -181,6 +183,7 @@ class ContextImpl extends Context {
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
     private static Object sWimaxManager;
+    private static Object sLocationProxyManager;
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<String, SharedPreferencesImpl>();
 
@@ -1013,8 +1016,9 @@ class ContextImpl extends Context {
             return getNfcManager();
         } else if (WimaxManagerConstants.WIMAX_SERVICE.equals(name)) {
             return getWimaxManager();
+        } else if (LocationProxyManagerConstants.LOCATION_PROXY_SERVICE.equals(name)) {
+            return getLocationProxyManager();
         }
-
         return null;
     }
 
@@ -1278,6 +1282,16 @@ class ContextImpl extends Context {
         }
         return sWimaxManager;
     }
+
+    private Object getLocationProxyManager() {
+        synchronized (sSync) {
+            if (sLocationProxyManager == null) {
+                sLocationProxyManager = LocationProxyHelper.createLocationProxyService(this, mMainThread.getHandler());
+            }
+        }
+        return sLocationProxyManager;
+    }
+
 
     @Override
     public int checkPermission(String permission, int pid, int uid) {
