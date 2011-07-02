@@ -415,6 +415,11 @@
     <string-array name="config_twoDigitNumberPattern">
     </string-array>
 
+    <!-- A list of services that are started inside the SystemServer -->
+    <!-- The names are in the ComponentName flattened format (package/class) -->
+    <string-array translatable="false" name="systemServices">
+    </string-array>
+
     <!-- ************************************************
          *                                              *
          *    GLOBAL DEFAULT VALUES FOR CM SETTINGS     *

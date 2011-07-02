@@ -499,6 +499,19 @@ class ServerThread extends Thread {
             }
         }
 
+		String[] serviceEntries =
+	            context.getResources().getStringArray(com.android.internal.R.array.systemServices);
+	        for (String entry : serviceEntries) {
+	            try {
+	                ComponentName cn = ComponentName.unflattenFromString(entry);
+	                Intent intent = new Intent();
+	                intent.setComponent(cn);
+	                context.startService(intent);
+	                Slog.i(TAG, "Service started " + cn);
+	            } catch (Throwable e) {
+	                Slog.e(TAG, "Failed to start " + entry, e);
+	            }
+	        }
         // make sure the ADB_ENABLED setting value matches the secure property value
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
                 Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "-1")));
