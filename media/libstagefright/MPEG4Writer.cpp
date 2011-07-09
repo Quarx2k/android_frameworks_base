@@ -1711,10 +1711,6 @@ status_t MPEG4Writer::Track::threadEntry() {
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs;
 
-    uint8_t *copy_spspps;
-    int32_t copy_spspps_size = 0;
-
-
     if (mIsAudio) {
         prctl(PR_SET_NAME, (unsigned long)"AudioTrackEncoding", 0, 0, 0);
     } else {
@@ -1764,71 +1760,6 @@ status_t MPEG4Writer::Track::threadEntry() {
                        buffer->range_length());
             }
 
-            buffer->release();
-            buffer = NULL;
-
-            mGotAllCodecSpecificData = true;
-            continue;
-        }
-        else if (mIsAvc && count < 3) {
-            size_t size = buffer->range_length();
-            size_t start_code_size = 0;
-
-            CHECK(!mGotAllCodecSpecificData);
-
-            start_code_size = memcmp("\x00\x00\x00\x01",
-                    (uint8_t *)buffer->data(), 4) ? 4 : 0;
-
-            switch (count) {
-                case 1:
-                {
-                    copy_spspps = (uint8_t *)malloc(size + start_code_size);
-                    copy_spspps_size = size + start_code_size;
-                    if (start_code_size)
-                        memcpy(copy_spspps,
-                                "\x00\x00\x00\x01", start_code_size);
-                    memcpy((uint8_t *)copy_spspps + start_code_size,
-                            (const uint8_t *)buffer->data()
-                                + buffer->range_offset(),
-                            size);
-                    break;
-                }
-
-                case 2:
-                {
-                    size_t offset = copy_spspps_size;
-                    copy_spspps_size += (size + start_code_size);
-                    copy_spspps = (uint8_t *)realloc(copy_spspps, copy_spspps_size);
-                    if (start_code_size)
-                        memcpy(&copy_spspps[offset],
-                                "\x00\x00\x00\x01", start_code_size);
-                    memcpy(&copy_spspps[offset + start_code_size],
-                            (const uint8_t *)buffer->data()
-                                + buffer->range_offset(),
-                            size);
-                    status_t err = makeAVCCodecSpecificData(
-                            copy_spspps, copy_spspps_size);
-                    CHECK_EQ(OK, err);
-                    free(copy_spspps);
-                    copy_spspps = NULL;
-                    mGotAllCodecSpecificData = true;
-                    break;
-                }
-            }
-
-            buffer->release();
-            buffer = NULL;
-
-            continue;
-
-        } else if (mCodecSpecificData == NULL && mIsMPEG4) {
-            CHECK(!mGotAllCodecSpecificData);
-            mCodecSpecificDataSize = buffer->range_length();
-            mCodecSpecificData = malloc(mCodecSpecificDataSize);
-            memcpy(mCodecSpecificData,
-                    (const uint8_t *)buffer->data()
-                        + buffer->range_offset(),
-                   buffer->range_length());
             buffer->release();
             buffer = NULL;
 
@@ -2143,13 +2074,12 @@ int64_t MPEG4Writer::Track::getEstimatedTrackSizeBytes() const {
 status_t MPEG4Writer::Track::checkCodecSpecificData() const {
     const char *mime;
     CHECK(mMeta->findCString(kKeyMIMEType, &mime));
-	LOGE("Codec specific data is: %s",mime);
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime) ||
         !strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime) ||
         !strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         if (!mCodecSpecificData ||
             mCodecSpecificDataSize <= 0) {
-            LOGE("Missing codec specific data %s",mime);
+            LOGE("Missing codec specific data");
             return ERROR_MALFORMED;
         }
     } else {
