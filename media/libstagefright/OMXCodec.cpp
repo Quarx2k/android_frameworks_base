@@ -198,8 +198,8 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.decode" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.720P.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.720P.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.SEC.AVC.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder" },
 //    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcdec" },
@@ -715,8 +715,9 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
             bool success = meta->findInt32(kKeyWidth, &width);
             success = success && meta->findInt32(kKeyHeight, &height);
             CHECK(success);
-            if (width*height > MAX_RESOLUTION) {
-                // need OMX.TI.720P.Encoder
+	    LOGE("Resolution: %d*%d=%d",width,height,width*height);
+            if (width*height > 407040) {
+	    LOGE("Need OMX.TI.720P.Encoder.");
                 return ERROR_UNSUPPORTED;
             }
         }
