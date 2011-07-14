@@ -857,8 +857,8 @@ const char *AudioParameter::keyFormat = "format";
 const char *AudioParameter::keyChannels = "channels";
 const char *AudioParameter::keyFrameCount = "frame_count";
 #ifdef HAVE_FM_RADIO
-const char *AudioParameter::keyFmOn = "fm_on";
-const char *AudioParameter::keyFmOff = "fm_off";
+const char *AudioParameter::keyFmOn = "FM_launch";
+const char *AudioParameter::keyFmOff = "FM_launch";
 #endif
 const char *AudioParameter::keyInputSource = "input_source";
 
