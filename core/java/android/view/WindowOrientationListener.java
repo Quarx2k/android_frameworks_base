@@ -43,13 +43,7 @@ public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG || Config.DEBUG;
-    private static final int ROTATION_0_INTRODUCED_FLAG = 16;
-    private static final int ROTATION_0_FLAG = 8;
-    private static final int ROTATION_90_FLAG = 1;
-    private static final int ROTATION_180_FLAG = 2;
-    private static final int ROTATION_270_FLAG = 4;
-    private static int sAccelerometerMode =
-        ROTATION_0_INTRODUCED_FLAG|ROTATION_0_FLAG|ROTATION_90_FLAG|ROTATION_270_FLAG;
+    private static int sAccelerometerMode = 13;
     private SensorManager mSensorManager;
     private boolean mEnabled = false;
     private int mRate;
@@ -172,8 +166,7 @@ public abstract class WindowOrientationListener {
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
             sAccelerometerMode = Settings.System.getInt(resolver,
-                    Settings.System.ACCELEROMETER_ROTATION_MODE,
-                    ROTATION_0_INTRODUCED_FLAG|ROTATION_0_FLAG|ROTATION_90_FLAG|ROTATION_270_FLAG);
+                    Settings.System.ACCELEROMETER_ROTATION_MODE, 13);
             if (localLOGV) Log.i(TAG, "sAccelerometerMode=" + sAccelerometerMode);
         }
     }
@@ -383,17 +376,16 @@ public abstract class WindowOrientationListener {
             boolean allowed = true;
             switch (rotation) {
                 case ROTATION_0:
-                    allowed = (sAccelerometerMode & ROTATION_0_FLAG) != 0 ||
-                              (sAccelerometerMode & ROTATION_0_INTRODUCED_FLAG) == 0;
+                    allowed = (sAccelerometerMode & 8) != 0;
                     break;
                 case ROTATION_90:
-                    allowed = (sAccelerometerMode & ROTATION_90_FLAG) != 0;
+                    allowed = (sAccelerometerMode & 1) != 0;
                     break;
                 case ROTATION_180:
-                    allowed = (sAccelerometerMode & ROTATION_180_FLAG) != 0;
+                    allowed = (sAccelerometerMode & 2) != 0;
                     break;
                 case ROTATION_270:
-                    allowed = (sAccelerometerMode & ROTATION_270_FLAG) != 0;
+                    allowed = (sAccelerometerMode & 4) != 0;
                     break;
             }
             if (!allowed) {
