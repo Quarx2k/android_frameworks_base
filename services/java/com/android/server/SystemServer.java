@@ -385,10 +385,7 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Location Manager", e);
             }
-<<<<<<< HEAD
 
-=======
->>>>>>> 53faa6fdd7ce617af2f67175fe92e27461085128
             try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
