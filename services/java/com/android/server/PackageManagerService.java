@@ -3376,6 +3376,7 @@ class PackageManagerService extends IPackageManager.Stub {
                      * Gingerbread.
                      */
                     pkg.mScanPath = path;
+<<<<<<< HEAD
                     if ((scanMode&SCAN_NO_DEX) == 0) {	
                         int DexStatus = (performDexOptLI(pkg, forceDex));	
                         if (DexStatus == DEX_OPT_FAILED) {	
@@ -3384,6 +3385,16 @@ class PackageManagerService extends IPackageManager.Stub {
                        /*
                        * Only attempt to unpack native libraries if dexopt was perfomred	
                         * TODO, fix for Odex	
+=======
+                    if ((scanMode&SCAN_NO_DEX) == 0) {
+                        int DexStatus = (performDexOptLI(pkg, forceDex));
+                        if (DexStatus == DEX_OPT_FAILED) {
+                            mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
+                            return null;
+                       /*
+                        * Only attempt to unpack native libraries if dexopt was performed
+                        * TODO, fix for Odex
+>>>>>>> 07e6712266b5f77f335ae9c64f9b1e10bb04f564
                         */
                         } else if (DexStatus == DEX_OPT_PERFORMED) {
                             Slog.i(TAG, "Unpacking native libraries for " + path);
