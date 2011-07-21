@@ -3397,6 +3397,14 @@ class PackageManagerService extends IPackageManager.Stub {
                             pkg.applicationInfo.nativeLibraryDir);
                 }
             }
+            pkg.mScanPath = path;
+
+            if ((scanMode&SCAN_NO_DEX) == 0) {
+                if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
+                    mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
+                    return null;
+                }
+            }
         }
 
         if (mFactoryTest && pkg.requestedPermissions.contains(
