@@ -1710,6 +1710,10 @@ status_t MPEG4Writer::Track::threadEntry() {
     uint32_t previousSampleSize = 0;  // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs;
+#if defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3)
+    uint8_t *copy_spspps;
+    int32_t copy_spspps_size = 0;
+#endif
 
     if (mIsAudio) {
         prctl(PR_SET_NAME, (unsigned long)"AudioTrackEncoding", 0, 0, 0);
@@ -1766,6 +1770,73 @@ status_t MPEG4Writer::Track::threadEntry() {
             mGotAllCodecSpecificData = true;
             continue;
         }
+#if defined(OMAP_ENHANCEMENT) && defined(TARGET_OMAP3)
+        else if (mIsAvc && count < 3) {
+            size_t size = buffer->range_length();
+            size_t start_code_size = 0;
+
+            CHECK(!mGotAllCodecSpecificData);
+
+            start_code_size = memcmp("\x00\x00\x00\x01",
+                    (uint8_t *)buffer->data(), 4) ? 4 : 0;
+
+            switch (count) {
+                case 1:
+                {
+                    copy_spspps = (uint8_t *)malloc(size + start_code_size);
+                    copy_spspps_size = size + start_code_size;
+                    if (start_code_size)
+                        memcpy(copy_spspps,
+                                "\x00\x00\x00\x01", start_code_size);
+                    memcpy((uint8_t *)copy_spspps + start_code_size,
+                            (const uint8_t *)buffer->data()
+                                + buffer->range_offset(),
+                            size);
+                    break;
+                }
+
+                case 2:
+                {
+                    size_t offset = copy_spspps_size;
+                    copy_spspps_size += (size + start_code_size);
+                    copy_spspps = (uint8_t *)realloc(copy_spspps, copy_spspps_size);
+                    if (start_code_size)
+                        memcpy(&copy_spspps[offset],
+                                "\x00\x00\x00\x01", start_code_size);
+                    memcpy(&copy_spspps[offset + start_code_size],
+                            (const uint8_t *)buffer->data()
+                                + buffer->range_offset(),
+                            size);
+                    status_t err = makeAVCCodecSpecificData(
+                            copy_spspps, copy_spspps_size);
+                    CHECK_EQ(OK, err);
+                    free(copy_spspps);
+                    copy_spspps = NULL;
+                    mGotAllCodecSpecificData = true;
+                    break;
+                }
+            }
+
+            buffer->release();
+            buffer = NULL;
+
+            continue;
+
+        } else if (mCodecSpecificData == NULL && mIsMPEG4) {
+            CHECK(!mGotAllCodecSpecificData);
+            mCodecSpecificDataSize = buffer->range_length();
+            mCodecSpecificData = malloc(mCodecSpecificDataSize);
+            memcpy(mCodecSpecificData,
+                    (const uint8_t *)buffer->data()
+                        + buffer->range_offset(),
+                   buffer->range_length());
+            buffer->release();
+            buffer = NULL;
+
+            mGotAllCodecSpecificData = true;
+            continue;
+        }
+#endif
 
         // Make a deep copy of the MediaBuffer and Metadata and release
         // the original as soon as we can
