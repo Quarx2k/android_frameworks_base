@@ -420,9 +420,6 @@
          Format for each item is: <path_to_service_jar_file>:<service_class_name> -->
     <string-array name="config_vendorServices">
     </string-array>
-
-    <!-- CrystalTalk -->
-    <bool name="crystaltalk_enabled">false</bool>
 	
     <!-- ************************************************
          *                                              *
