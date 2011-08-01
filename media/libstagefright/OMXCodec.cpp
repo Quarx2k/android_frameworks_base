@@ -718,10 +718,11 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
 	    LOGE("Resolution: %d*%d=%d",width,height,width*height);
             if (width*height > 407040) {
 	    LOGE("Need OMX.TI.720P.Encoder.");
-                return ERROR_UNSUPPORTED;
+            return ERROR_UNSUPPORTED;
             }
         }
     }
+
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
         setAMRFormat(false /* isWAMR */, bitRate);
     }
@@ -1550,6 +1551,7 @@ OMXCodec::OMXCodec(
       mComponentName(strdup(componentName)),
       mSource(source),
       mCodecSpecificDataIndex(0),
+      mPmemInfo(NULL),
       mState(LOADED),
       mInitialBufferSubmit(true),
       mSignalledEOS(false),
@@ -1560,8 +1562,7 @@ OMXCodec::OMXCodec(
       mTargetTimeUs(-1),
       mSkipTimeUs(-1),
       mLeftOverBuffer(NULL),
-      mPaused(false),
-      mPmemInfo(NULL){
+      mPaused(false){
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
