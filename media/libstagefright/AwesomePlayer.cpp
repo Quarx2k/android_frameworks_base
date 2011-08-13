@@ -1057,10 +1057,9 @@ status_t AwesomePlayer::initAudioDecoder() {
             const char *componentName;
             if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
                 componentName = "OMX.TI.AAC.decode";
-
-            mAudioSource = OMXCodec::Create(
-                    mClient.interface(), mAudioTrack->getFormat(),
-                    false, // createEncoder
+                mAudioSource = OMXCodec::Create(
+                        mClient.interface(), mAudioTrack->getFormat(),
+                        false, // createEncoder
                         mAudioTrack, componentName);
             }
             else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_WMA)) {
@@ -1078,7 +1077,6 @@ status_t AwesomePlayer::initAudioDecoder() {
                         mClient.interface(), mAudioTrack->getFormat(),
                         false,
                         mAudioTrack);
-            
         }
     }
 
