@@ -437,7 +437,6 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_data_fully_out_h,
               R.drawable.stat_sys_data_fully_inandout_h }
     };
-
     //CDMA
     // Use 3G icons for EVDO data and 1x icons for 1XRTT data
     private static final int[][] sDataNetType_1x = {
@@ -450,6 +449,20 @@ public class StatusBarPolicy {
               R.drawable.stat_sys_data_fully_out_1x,
               R.drawable.stat_sys_data_fully_inandout_1x }
             };
+
+    //LTE, + stuff like HSPAP+, which is still
+    //3.5G but carriers like to pretend it's 4G
+    private static final int[][] sDataNetType_4g = {
+            { R.drawable.stat_sys_data_connected_4g,
+              R.drawable.stat_sys_data_in_4g,
+              R.drawable.stat_sys_data_out_4g,
+              R.drawable.stat_sys_data_inandout_4g },
+            { R.drawable.stat_sys_data_fully_connected_4g,
+              R.drawable.stat_sys_data_fully_in_4g,
+              R.drawable.stat_sys_data_fully_out_4g,
+              R.drawable.stat_sys_data_fully_inandout_4g }
+    };
+
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -562,8 +575,7 @@ public class StatusBarPolicy {
                 updateVolume();
             }
             else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                int state = intent.getIntExtra("state", 0);
-                mService.setIconVisibility("headset", (state == 1));
+                updateHeadset(intent);
             }
             else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
                 updateSimState(intent);
@@ -1274,7 +1286,12 @@ public class StatusBarPolicy {
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
         case TelephonyManager.NETWORK_TYPE_EVDO_B:
+        case TelephonyManager.NETWORK_TYPE_EHRPD:
             mDataIconList = sDataNetType_3g[mInetCondition];
+            break;
+        case TelephonyManager.NETWORK_TYPE_LTE:
+        case TelephonyManager.NETWORK_TYPE_HSPAP:
+            mDataIconList = sDataNetType_4g[mInetCondition];
             break;
         default:
             mDataIconList = sDataNetType_g[mInetCondition];
@@ -1366,6 +1383,19 @@ public class StatusBarPolicy {
             mService.setIconVisibility("volume", visible);
             mVolumeVisible = visible;
         }
+    }
+
+    private final void updateHeadset(Intent intent) {
+        final boolean isConnected = intent.getIntExtra("state", 0) == 1;
+
+        if (isConnected) {
+            final boolean hasMicrophone = intent.getIntExtra("microphone", 1) == 1;
+            final int iconId = hasMicrophone
+                    ? com.android.internal.R.drawable.stat_sys_headset
+                    : R.drawable.stat_sys_headset_no_mic;
+            mService.setIcon("headset", iconId, 0);
+        }
+        mService.setIconVisibility("headset", isConnected);
     }
 
     private final void updateBluetooth(Intent intent) {
