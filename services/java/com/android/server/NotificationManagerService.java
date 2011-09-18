@@ -149,10 +149,14 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // colors for random and 'pulse all colors in order'
     private int mLastColor = 1;
+<<<<<<< HEAD
     private static final String[] sColorList = {
         "green", "white", "red", "blue", "yellow", "cyan",
         "#800080", "#ffc0cb", "#ffa500", "#add8e6"
     };
+=======
+    private int[] mColorList;
+>>>>>>> cdefy/gingerbread
 
     private static final int UPDATE_LED_REQUEST = 0;
     private static final String ACTION_UPDATE_LED =
@@ -735,6 +739,13 @@ public class NotificationManagerService extends INotificationManager.Stub
         if (0 == Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.DEVICE_PROVISIONED, 0)) {
             mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
+        }
+
+        String[] colorList = resources.getStringArray(
+                com.android.internal.R.array.notification_led_random_color_set);
+        mColorList = new int[colorList.length];
+        for (int i = 0; i < colorList.length; i++) {
+            mColorList[i] = Color.parseColor(colorList[i]);
         }
 
         // register for battery changed notifications
@@ -1463,8 +1474,13 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         if (settings.color == 0) {
             Random generator = new Random();
+<<<<<<< HEAD
             int x = generator.nextInt(sColorList.length - 1);
             return Color.parseColor(sColorList[x]);
+=======
+            int x = generator.nextInt(mColorList.length - 1);
+            return mColorList[x];
+>>>>>>> cdefy/gingerbread
         }
 
         return settings.color;
@@ -1479,6 +1495,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         if (mLedRandomColor) {
             Random generator = new Random();
+<<<<<<< HEAD
             int x = generator.nextInt(sColorList.length - 1);
             rledARGB = Color.parseColor(sColorList[x]);
         } else if (mLedPulseAllColors) {
@@ -1486,6 +1503,15 @@ public class NotificationManagerService extends INotificationManager.Stub
                 mLastColor = 1;
             }
             rledARGB = Color.parseColor(sColorList[mLastColor - 1]);
+=======
+            int x = generator.nextInt(mColorList.length - 1);
+            rledARGB = mColorList[x];
+        } else if (mLedPulseAllColors) {
+            if (mLastColor >= mColorList.length) {
+                mLastColor = 1;
+            }
+            rledARGB = mColorList[mLastColor - 1];
+>>>>>>> cdefy/gingerbread
             mLastColor = mLastColor + 1;
         } else if (mLedBlendColors) {
             // Blend lights: Credit to eshabtai for the application of this.
@@ -1593,8 +1619,20 @@ public class NotificationManagerService extends INotificationManager.Stub
                     mNotificationLight.notificationPulse(ledARGB, ledOnMS, ledOffMS);
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, scheduleTime, mLedUpdateIntent);
                 } else {
+<<<<<<< HEAD
                     mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
                             ledOnMS, ledOffMS);
+=======
+                    if (ledOnMS == 0 && ledOffMS == 0) {
+                        mNotificationLight.turnOff();
+                    } else {
+                        int mode = (ledOffMS == 0)
+                            ? LightsService.LIGHT_FLASH_NONE
+                            : LightsService.LIGHT_FLASH_TIMED;
+
+                        mNotificationLight.setFlashing(ledARGB, mode, ledOnMS, ledOffMS);
+                    }
+>>>>>>> cdefy/gingerbread
                     mAlarmManager.cancel(mLedUpdateIntent);
                 }
             } else {

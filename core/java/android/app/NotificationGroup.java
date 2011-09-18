@@ -79,7 +79,10 @@ public class NotificationGroup implements Parcelable {
 
     public boolean hasPackage(String pkg) {
         boolean result = mPackages.contains(pkg);
+<<<<<<< HEAD
      //   Log.i("PROFILE", "Group: " + mName + " containing : " + pkg + " : " + result);
+=======
+>>>>>>> cdefy/gingerbread
         return result;
     }
 
