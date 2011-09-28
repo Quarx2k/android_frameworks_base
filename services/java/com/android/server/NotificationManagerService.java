@@ -149,14 +149,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     // colors for random and 'pulse all colors in order'
     private int mLastColor = 1;
-<<<<<<< HEAD
-    private static final String[] sColorList = {
-        "green", "white", "red", "blue", "yellow", "cyan",
-        "#800080", "#ffc0cb", "#ffa500", "#add8e6"
-    };
-=======
     private int[] mColorList;
->>>>>>> cdefy/gingerbread
 
     private static final int UPDATE_LED_REQUEST = 0;
     private static final String ACTION_UPDATE_LED =
@@ -1103,16 +1096,13 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
             }
 
-            try{
-                final ProfileManager profileManager = (ProfileManager) mContext
-                .getSystemService(Context.PROFILE_SERVICE);
-
-                Profile currentProfile = profileManager.getActiveProfile();
-              //  Log.v(TAG, "Active profile: " + currentProfile.getName());
+            try {
+                final ProfileManager profileManager =
+                        (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
                 ProfileGroup group = profileManager.getActiveProfileGroup(pkg);
-              //  Log.v(TAG, "Pkg: " + pkg + " group: " + group.getName());
-                notification = currentProfile.processNotification(group.getName(), notification);
-            }catch(Throwable th){
+                Log.v(TAG, "Pkg: " + pkg + " group: " + group.getUuid());
+                notification = group.processNotification(notification);
+            } catch(Throwable th) {
                 Log.e(TAG, "An error occurred profiling the notification.", th);
             }
 
@@ -1474,13 +1464,8 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         if (settings.color == 0) {
             Random generator = new Random();
-<<<<<<< HEAD
-            int x = generator.nextInt(sColorList.length - 1);
-            return Color.parseColor(sColorList[x]);
-=======
             int x = generator.nextInt(mColorList.length - 1);
             return mColorList[x];
->>>>>>> cdefy/gingerbread
         }
 
         return settings.color;
@@ -1495,15 +1480,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         if (mLedRandomColor) {
             Random generator = new Random();
-<<<<<<< HEAD
-            int x = generator.nextInt(sColorList.length - 1);
-            rledARGB = Color.parseColor(sColorList[x]);
-        } else if (mLedPulseAllColors) {
-            if (mLastColor >= sColorList.length) {
-                mLastColor = 1;
-            }
-            rledARGB = Color.parseColor(sColorList[mLastColor - 1]);
-=======
             int x = generator.nextInt(mColorList.length - 1);
             rledARGB = mColorList[x];
         } else if (mLedPulseAllColors) {
@@ -1511,7 +1487,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 mLastColor = 1;
             }
             rledARGB = mColorList[mLastColor - 1];
->>>>>>> cdefy/gingerbread
             mLastColor = mLastColor + 1;
         } else if (mLedBlendColors) {
             // Blend lights: Credit to eshabtai for the application of this.
@@ -1619,10 +1594,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                     mNotificationLight.notificationPulse(ledARGB, ledOnMS, ledOffMS);
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, scheduleTime, mLedUpdateIntent);
                 } else {
-<<<<<<< HEAD
-                    mNotificationLight.setFlashing(ledARGB, LightsService.LIGHT_FLASH_TIMED,
-                            ledOnMS, ledOffMS);
-=======
                     if (ledOnMS == 0 && ledOffMS == 0) {
                         mNotificationLight.turnOff();
                     } else {
@@ -1632,7 +1603,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
                         mNotificationLight.setFlashing(ledARGB, mode, ledOnMS, ledOffMS);
                     }
->>>>>>> cdefy/gingerbread
                     mAlarmManager.cancel(mLedUpdateIntent);
                 }
             } else {
