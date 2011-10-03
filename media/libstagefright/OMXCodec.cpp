@@ -776,7 +776,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
             bool success = meta->findInt32(kKeyWidth, &width);
             success = success && meta->findInt32(kKeyHeight, &height);
             CHECK(success);
-            if (width*height > 407040) {
+            if (width*height >= 407040) {
                 // need OMX.TI.720P.Encoder if > 480x848
                 LOGE("OMX.TI.720P.Encoder is required.");
                 return ERROR_UNSUPPORTED;
