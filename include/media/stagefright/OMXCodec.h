@@ -121,7 +121,13 @@ private:
         kOutputBuffersAreUnreadable           = 8192,
         kStoreMetaDataInInputVideoBuffers     = 16384,
         kCanNotSetVideoParameters             = 32768,
-        kDoesNotRequireMemcpyOnOutputPort     = 65536
+        kDoesNotRequireMemcpyOnOutputPort     = 65536,
+#ifdef TARGET_OMAP3
+        kDecoderNeedsPortReconfiguration      = 131072,
+        kDecoderCantRenderSmallClips          = 262144,
+        kInterlacedOutputContent              = 524288,
+        kThumbnailMode                        = 1048576,
+#endif
     };
 
     struct BufferInfo {

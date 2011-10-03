@@ -1056,7 +1056,7 @@ status_t AwesomePlayer::initAudioDecoder() {
     } else {
             const char *componentName;
             if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
-                componentName = "OMX.TI.AAC.decode";
+                componentName = "OMX.ITTIAM.AAC.decode";
                 mAudioSource = OMXCodec::Create(
                         mClient.interface(), mAudioTrack->getFormat(),
                         false, // createEncoder
