@@ -513,7 +513,8 @@ uint32_t OMXCodec::getComponentQuirks(
                 quirks |= OMXCodec::kRequiresAllocateBufferOnOutputPorts;
         }
     }
-    if (!strncmp(componentName, "OMX.TI.", 7)) {
+    if (!strncmp(componentName, "OMX.TI.", 7) ||
+            !strcmp(componentName, "OMX.ITTIAM.")) {
         // Apparently I must not use OMX_UseBuffer on either input or
         // output ports on any of the TI components or quote:
         // "(I) may have unexpected problem (sic) which can be timing related
@@ -776,7 +777,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
             bool success = meta->findInt32(kKeyWidth, &width);
             success = success && meta->findInt32(kKeyHeight, &height);
             CHECK(success);
-            if (width*height >= 407040) {
+            if (width*height >= 407040) { 
                 // need OMX.TI.720P.Encoder if > 480x848
                 LOGE("OMX.TI.720P.Encoder is required.");
                 return ERROR_UNSUPPORTED;
