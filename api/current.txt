@@ -11638,10 +11638,10 @@ package android.media {
     field public static final int AMR_NB = 1; // 0x1
     field public static final int AMR_WB = 2; // 0x2
     field public static final int DEFAULT = 0; // 0x0
-    field public static final int HE_AAC = 4; // 0x4
     field public static final int EVRC = 6; // 0x6
-    field public static final int QCELP = 7; // 0x7
+    field public static final int HE_AAC = 4; // 0x4
     field public static final int LPCM = 8; // 0x8
+    field public static final int QCELP = 7; // 0x7
   }
 
   public final class MediaRecorder.AudioSource {
@@ -23113,8 +23113,6 @@ package android.view {
     field public static final int DISPLAY_OUTPUT_TYPE_HDMI = 3; // 0x3
     field public static final int DISPLAY_OUTPUT_TYPE_LCD = 1; // 0x1
     field public static final int DISPLAY_OUTPUT_TYPE_NONE = 0; // 0x0
-    field public static final int DISPLAY_OUTPUT_TYPE_TV = 2; // 0x2
-    field public static final int DISPLAY_OUTPUT_TYPE_VGA = 4; // 0x4
     field public static final int DISPLAY_TVDAC_CVBS = 2; // 0x2
     field public static final int DISPLAY_TVDAC_NONE = 0; // 0x0
     field public static final int DISPLAY_TVDAC_SVIDEO = 3; // 0x3
@@ -23155,7 +23153,6 @@ package android.view {
     field public static final int DISPLAY_VGA_H640_V480 = 29; // 0x1d
     field public static final int DISPLAY_VGA_H800_V600 = 28; // 0x1c
     field public static final java.lang.String EXTRA_HDMISTATUS = "hdmistatus";
-    field public static final java.lang.String EXTRA_TVSTATUS = "tvdacstatus";
   }
 
   public class DragEvent implements android.os.Parcelable {
