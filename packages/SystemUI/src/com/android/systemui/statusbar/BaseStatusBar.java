@@ -331,8 +331,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                         if (item.getItemId() == R.id.notification_inspect_item) {
                             startApplicationDetailsActivity(packageNameF);
                             animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
+                        } else if (item.getItemId() == R.id.notification_inspect_item_kill_app){
+                        } else if (item.getItemId() == R.id.notification_inspect_item_wipe_app){
                         } else {
-                            return false;
+                        	return false;
                         }
                         return true;
                     }
