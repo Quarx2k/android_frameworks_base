@@ -18,13 +18,16 @@ package com.android.systemui.statusbar;
 
 import java.util.ArrayList;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.graphics.Rect;
@@ -69,7 +72,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
-
 import com.android.systemui.R;
 
 public abstract class BaseStatusBar extends SystemUI implements
@@ -326,13 +328,26 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mNotificationBlamePopup.getMenuInflater().inflate(
                         R.menu.notification_popup_menu,
                         mNotificationBlamePopup.getMenu());
+                
+                final ContentResolver cr = mContext.getContentResolver();
+                if(Settings.Secure.getInt(cr,
+                        Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
+                	mNotificationBlamePopup.getMenu().findItem(R.id.notification_inspect_item_kill_app).setVisible(false);
+                	mNotificationBlamePopup.getMenu().findItem(R.id.notification_inspect_item_wipe_app).setVisible(false);
+                }
+                
                 mNotificationBlamePopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.notification_inspect_item) {
                             startApplicationDetailsActivity(packageNameF);
                             animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
                         } else if (item.getItemId() == R.id.notification_inspect_item_kill_app){
+                        	ActivityManager am = (ActivityManager)mContext.getSystemService(
+                                    Context.ACTIVITY_SERVICE);
+                            am.forceStopPackage(packageNameF);
                         } else if (item.getItemId() == R.id.notification_inspect_item_wipe_app){
+                        	ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                            am.clearApplicationUserData(packageNameF, new FakeClearUserDataObserver());
                         } else {
                         	return false;
                         }
@@ -345,6 +360,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         };
     }
+    
+    class FakeClearUserDataObserver extends IPackageDataObserver.Stub {
+        public void onRemoveCompleted(final String packageName, final boolean succeeded) {
+//            final Message msg = mHandler.obtainMessage(CLEAR_USER_DATA);
+//            msg.arg1 = succeeded?OP_SUCCESSFUL:OP_FAILED;
+//            mHandler.sendMessage(msg);
+         }
+     }
 
     public void dismissPopups() {
         if (mNotificationBlamePopup != null) {
