@@ -21,8 +21,10 @@ import android.animation.LayoutTransition;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageDataObserver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -882,6 +884,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
         mPopup = popup;
         popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
+        
+        final ContentResolver cr = mContext.getContentResolver();
+        if(Settings.Secure.getInt(cr,
+                Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
+        	popup.getMenu().findItem(R.id.recent_kill_app).setVisible(false);
+        	popup.getMenu().findItem(R.id.recent_wipe_app).setVisible(false);
+        }
+        
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.recent_remove_item) {
@@ -895,6 +905,26 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
+                }  else if (item.getItemId() == R.id.recent_kill_app){
+                	ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
+                    if (viewHolder != null) {
+                        final TaskDescription ad = viewHolder.taskDescription;
+                    	ActivityManager am = (ActivityManager)mContext.getSystemService(
+                                Context.ACTIVITY_SERVICE);
+                        am.forceStopPackage(ad.packageName);
+                    } else {
+                        throw new IllegalStateException("Oops, no tag on view " + selectedView);
+                    }
+                } else if (item.getItemId() == R.id.recent_wipe_app){
+                	ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
+                    if (viewHolder != null) {
+                    	final TaskDescription ad = viewHolder.taskDescription;
+                    	ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                        am.clearApplicationUserData(ad.packageName, new FakeClearUserDataObserver());
+                    } else {
+                        throw new IllegalStateException("Oops, no tag on view " + selectedView);
+                    }
+                	
                 } else {
                     return false;
                 }
@@ -909,4 +939,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         });
         popup.show();
     }
+    
+    class FakeClearUserDataObserver extends IPackageDataObserver.Stub {
+        public void onRemoveCompleted(final String packageName, final boolean succeeded) {
+         }
+     }
 }

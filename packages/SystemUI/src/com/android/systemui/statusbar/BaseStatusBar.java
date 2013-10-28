@@ -363,9 +363,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     
     class FakeClearUserDataObserver extends IPackageDataObserver.Stub {
         public void onRemoveCompleted(final String packageName, final boolean succeeded) {
-//            final Message msg = mHandler.obtainMessage(CLEAR_USER_DATA);
-//            msg.arg1 = succeeded?OP_SUCCESSFUL:OP_FAILED;
-//            mHandler.sendMessage(msg);
          }
      }
 
