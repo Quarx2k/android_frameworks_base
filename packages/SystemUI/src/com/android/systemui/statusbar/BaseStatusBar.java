@@ -337,7 +337,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (Settings.Secure.getInt(cr,
                         Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
                     mNotificationBlamePopup.getMenu()
-                            .findItem(R.id.notification_inspect_item_kill_app).setVisible(false);
+                            .findItem(R.id.notification_inspect_item_force_stop).setVisible(false);
                     mNotificationBlamePopup.getMenu()
                             .findItem(R.id.notification_inspect_item_wipe_app).setVisible(false);
                 }
@@ -348,7 +348,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 if (item.getItemId() == R.id.notification_inspect_item) {
                                     startApplicationDetailsActivity(packageNameF);
                                     animateCollapse(CommandQueue.FLAG_EXCLUDE_NONE);
-                                } else if (item.getItemId() == R.id.notification_inspect_item_kill_app) {
+                                } else if (item.getItemId() == R.id.notification_inspect_item_force_stop) {
                                     ActivityManager am = (ActivityManager) mContext
                                             .getSystemService(
                                             Context.ACTIVITY_SERVICE);

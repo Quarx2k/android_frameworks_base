@@ -888,7 +888,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         final ContentResolver cr = mContext.getContentResolver();
         if(Settings.Secure.getInt(cr,
                 Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
-        	popup.getMenu().findItem(R.id.recent_kill_app).setVisible(false);
+        	popup.getMenu().findItem(R.id.recent_force_stop).setVisible(false);
             popup.getMenu().findItem(R.id.recent_wipe_app).setVisible(false);
         }
         
@@ -905,7 +905,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
-                }  else if (item.getItemId() == R.id.recent_kill_app){
+                }  else if (item.getItemId() == R.id.recent_force_stop){
                 	ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
                     if (viewHolder != null) {
                         final TaskDescription ad = viewHolder.taskDescription;
