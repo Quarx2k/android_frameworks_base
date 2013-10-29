@@ -889,7 +889,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if(Settings.Secure.getInt(cr,
                 Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
         	popup.getMenu().findItem(R.id.recent_kill_app).setVisible(false);
-        	popup.getMenu().findItem(R.id.recent_wipe_app).setVisible(false);
+            popup.getMenu().findItem(R.id.recent_wipe_app).setVisible(false);
         }
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

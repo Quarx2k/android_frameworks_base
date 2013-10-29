@@ -21,7 +21,8 @@
     <item android:id="@+id/notification_inspect_item" 
         android:title="@string/status_bar_notification_inspect_item_title" />
     <item android:id="@+id/notification_inspect_item_kill_app" 
-        android:title="KILL APP" />
+        android:title="@string/advanced_dev_option_force_stop" />
     <item android:id="@+id/notification_inspect_item_wipe_app" 
-        android:title="WIPE APP" />
+        android:title="@string/advanced_dev_option_wipe_app" />
+
 </menu>
