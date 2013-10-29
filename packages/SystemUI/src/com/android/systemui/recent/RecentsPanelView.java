@@ -912,6 +912,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     	ActivityManager am = (ActivityManager)mContext.getSystemService(
                                 Context.ACTIVITY_SERVICE);
                         am.forceStopPackage(ad.packageName);
+                        mRecentsContainer.removeViewInLayout(selectedView);
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
@@ -921,6 +922,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     	final TaskDescription ad = viewHolder.taskDescription;
                     	ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
                         am.clearApplicationUserData(ad.packageName, new FakeClearUserDataObserver());
+                        mRecentsContainer.removeViewInLayout(selectedView);
                     } else {
                         throw new IllegalStateException("Oops, no tag on view " + selectedView);
                     }
