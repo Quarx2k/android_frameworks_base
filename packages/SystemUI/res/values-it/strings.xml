@@ -161,4 +161,6 @@
     <string name="navbar_menu_conditional_button">Tasto menu (nascondi autom.)</string>
     <string name="navbar_menu_always_button">Tasto menu (mostra sempre)</string>
     <string name="navbar_menu_big_button">Tasto menu</string>
+    <string name="advanced_dev_option_wipe_app">"Cancella dati applicazioni"</string>
+    <string name="advanced_dev_option_force_stop">"Arresto forzato"</string>
 </resources>
