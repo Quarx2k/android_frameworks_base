@@ -21,10 +21,14 @@ import android.animation.LayoutTransition;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -40,6 +44,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.IWindowManager;
@@ -890,7 +895,29 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED, 0) == 0) {
         	popup.getMenu().findItem(R.id.recent_force_stop).setVisible(false);
             popup.getMenu().findItem(R.id.recent_wipe_app).setVisible(false);
-        }
+         } else {
+            ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
+            if (viewHolder != null) {
+                final TaskDescription ad = viewHolder.taskDescription;
+                try {
+                    PackageManager pm = (PackageManager) mContext.getPackageManager();                    
+                    ApplicationInfo mAppInfo = pm.getApplicationInfo(ad.packageName, 0);
+                    DevicePolicyManager mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                    
+                    if ((mAppInfo.flags&(ApplicationInfo.FLAG_SYSTEM
+                          | ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA))
+                          == ApplicationInfo.FLAG_SYSTEM
+                          || mDpm.packageHasActiveAdmins(ad.packageName))
+                       popup.getMenu()
+                      .findItem(R.id.notification_inspect_item_wipe_app).setEnabled(false);
+                    else
+                        Slog.d(TAG, "Not a 'special' application");
+                } catch (NameNotFoundException ex) {
+                    Slog.e(TAG, "Failed looking up ApplicationInfo for " + ad.packageName, ex);
+                }
+            }
+        } 
+        
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {

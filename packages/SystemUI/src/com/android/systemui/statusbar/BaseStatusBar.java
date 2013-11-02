@@ -16,18 +16,17 @@
 
 package com.android.systemui.statusbar;
 
-import java.util.ArrayList;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
-import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.graphics.Rect;
@@ -55,24 +54,25 @@ import android.view.WindowManagerImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RemoteViews;
 import android.widget.PopupMenu;
+import android.widget.RemoteViews;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.settings.applications.ApplicationsState;
+import com.android.systemui.R;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
@@ -340,8 +340,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                             .findItem(R.id.notification_inspect_item_force_stop).setVisible(false);
                     mNotificationBlamePopup.getMenu()
                             .findItem(R.id.notification_inspect_item_wipe_app).setVisible(false);
+                } else {
+                    try {
+                        PackageManager pm = (PackageManager) mContext.getPackageManager();                    
+                        ApplicationInfo mAppInfo = pm.getApplicationInfo(packageNameF, 0);
+                        DevicePolicyManager mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                        
+                        if ((mAppInfo.flags&(ApplicationInfo.FLAG_SYSTEM
+                              | ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA))
+                              == ApplicationInfo.FLAG_SYSTEM
+                              || mDpm.packageHasActiveAdmins(packageNameF))
+                          mNotificationBlamePopup.getMenu()
+                          .findItem(R.id.notification_inspect_item_wipe_app).setEnabled(false);
+                        
+                    } catch (NameNotFoundException ex) {
+                        Slog.e(TAG, "Failed looking up ApplicationInfo for " + packageNameF, ex);
+                    }
                 }
-
+                
                 mNotificationBlamePopup
                         .setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             public boolean onMenuItemClick(MenuItem item) {
